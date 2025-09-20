@@ -18,9 +18,9 @@
 // header implements a set using an hashmap with tombstones.
 //
 // Api:
+//
 //    HASHSET_DECLARE(prefix, type, hash_fn, eq_fn)
 //        Declare a new hashset for [type]
-//
 //        Args:
 //          - prefix: prefix to all the hashset functions and types
 //          - type: the value type stored in the set
@@ -34,60 +34,45 @@
 //                           type b, unsigned int b_len);
 //
 //    prefix_set
-//
 //        The hashset type
 //
 //    int prefix_set_init(prefix_set *set);
-//
 //        Initializes [set]
-//
 //        Returns: 0 on success, or a negative integer on error.
-//
 //        Notes: Remember to destroy the set when you are done.
 //
 //    void prefix_set_destroy(prefix_set *set);
-//
 //        Destroys [set]
 //
 //    size_t prefix_set_find_slot(prefix_set *set,
 //                                type key,
 //                                unsigned int key_len);
-//
 //        Finds the next slot available for [key] of [ley_len] length
 //        in [map]
-//
 //        Returns: a non-negative position in the internal map of the
 //        closest free slot, or a negative integer on error.
 //
 //    int prefix_set_resize(prefix_set *set,
 //                          size_t newcap);
-//
 //        Resizes [set] with [newcap] capacity.
-//
 //        Returns: 0 on success, or a negative integer on error.
 //
 //    bool prefix_set_insert(prefix_set *set,
 //                           type key,
 //                           unsigned int key_len);
-//
 //         Insert [key] element of [key_len] length in [set]
-//
 //         Returns: true if insertion succeed, or false otherwise.
 //
 //    bool prefix_set_contains(prefix_set *set,
 //                             type key,
 //                             unsigned int key_len);
-//
 //          Check if [set] contains [key] of [key_len] length
-//
 //          Returns: true if [set] contains the key, or false otherwise.
 //
 //    bool prefix_set_remove(prefix_set *set,
 //                           type key,
 //                           unsigned int key_len);
-//
 //          Removes [key] of [key_len] length from [set]
-//
 //          Returns: true if the key was successfully removed, or false
 //          otherwise.
 //
