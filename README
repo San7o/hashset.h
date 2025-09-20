@@ -1,7 +1,7 @@
 hashset.h
 ---------
 
-Implementation of an hashset in C99 for any type.
+Header-only implementation of an hashset in C99 for any type.
 
 Author:  Giovanni Santini
 Mail:    giovanni.santini@proton.me
