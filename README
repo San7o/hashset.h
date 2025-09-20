@@ -1,0 +1,128 @@
+hashset.h
+---------
+
+Implementation of an hashset in C99 for any type.
+
+Author:  Giovanni Santini
+Mail:    giovanni.santini@proton.me
+License: MIT
+
+
+Documentation
+-------------
+
+A set is a data structure where each element occurs only once. This
+header implements a set using an hashmap with tombstones.
+
+Api:
+   HASHSET_DECLARE(prefix, type, hash_fn, eq_fn)
+       Declare a new hashset for [type]
+
+       Args:
+         - prefix: prefix to all the hashset functions and types
+         - type: the value type stored in the set
+         - hash_fn: hash function for [type]. Must have the signature:
+
+               hashset_hash_t hash_fn(type val, unsigned int val_len);
+
+         - eq_fn: function to compare two [type] values, with signature:
+
+               bool eq_fn(type a, unsigned int a_len,
+                          type b, unsigned int b_len);
+
+   prefix_set
+
+       The hashset type
+
+   int prefix_set_init(prefix_set *set);
+
+       Initializes [set]
+
+       Returns: 0 on success, or a negative integer on error.
+
+       Notes: Remember to destroy the set when you are done.
+
+   void prefix_set_destroy(prefix_set *set);
+
+       Destroys [set]
+
+   size_t prefix_set_find_slot(prefix_set *set,
+                               type key,
+                               unsigned int key_len);
+
+       Finds the next slot available for [key] of [ley_len] length
+       in [map]
+
+       Returns: a non-negative position in the internal map of the
+       closest free slot, or a negative integer on error.
+
+   int prefix_set_resize(prefix_set *set,
+                         size_t newcap);
+
+       Resizes [set] with [newcap] capacity.
+
+       Returns: 0 on success, or a negative integer on error.
+
+   bool prefix_set_insert(prefix_set *set,
+                          type key,
+                          unsigned int key_len);
+
+        Insert [key] element of [key_len] length in [set]
+
+        Returns: true if insertion succeed, or false otherwise.
+
+   bool prefix_set_contains(prefix_set *set,
+                            type key,
+                            unsigned int key_len);
+
+         Check if [set] contains [key] of [key_len] length
+
+         Returns: true if [set] contains the key, or false otherwise.
+
+   bool prefix_set_remove(prefix_set *set,
+                          type key,
+                          unsigned int key_len);
+
+         Removes [key] of [key_len] length from [set]
+
+         Returns: true if the key was successfully removed, or false
+         otherwise.
+
+
+Usage
+-----
+
+Just #include "hashset.h".
+
+If you want to use the built-in hash functions, you need to also
+
+   #define HASHSET_IMPLEMENTATION
+
+before including the header.
+
+You can tune the library by #defining the allocator and free
+functions. See the "Config" comments under "Configuration" below.
+
+To start using an hashmap, you first need to declare one with the
+macro HASHSET_DECLARE. For example:
+
+
+   bool eq_u32(uint32_t a, unsigned int a_size,
+               uint32_t b, unsigned int b_size)
+   { return a == b; }
+
+   #define HASHSET_DECLARE(u32, uint32_t, hashset_hash_int32,
+                           eq_u32)
+
+Now you can start using the functions prefixed with "example".
+
+   u32_set s;
+   u32_set_init(&s);
+
+   u32_set_insert(&s, 42, 0);
+   assert(u32_set_contains(&s, 42, 0) == 1);
+
+   u32_set_destroy(&s);         
+
+See full example at the end of the header.
+
