@@ -180,6 +180,10 @@ typedef HASHSET_HASH_T hashset_hash_t;
 // Macros
 //
 
+#define HASHSET_OK                0
+#define HASHSET_ERROR_SET_NULL   -1
+#define HASHSET_ERROR_ALLOCATION -2
+  
 #define HASHSET_DECLARE(prefix, type, hash_fn, eq_fn)                   \
   typedef struct {                                                      \
     type val;                                                           \
@@ -195,24 +199,26 @@ typedef HASHSET_HASH_T hashset_hash_t;
                                                                         \
   static inline int prefix##_set_init(prefix##_set *set)                \
   {                                                                     \
-    if (set == NULL) return -1;                                         \
+    if (!set) return HASHSET_ERROR_SET_NULL;                            \
                                                                         \
     set->size = 0;                                                      \
     set->capacity = HASHSET_INITIAL_CAPACITY;                           \
     set->data = HASHSET_CALLOC(set->capacity,                           \
                                sizeof(prefix##_##type##_size_pair));    \
+    if (!set->data) return HASHSET_ERROR_ALLOCATION;                    \
     set->state = HASHSET_CALLOC(set->capacity, sizeof(uint8_t));        \
+    if (!set->state) return HASHSET_ERROR_ALLOCATION;                   \
                                                                         \
-    return 0;                                                           \
+    return HASHSET_OK;                                                  \
   }                                                                     \
                                                                         \
   static inline void prefix##_set_destroy(prefix##_set *set)            \
   {                                                                     \
-    if (set == NULL) return;                                            \
+    if (!set) return;                                                   \
                                                                         \
-    if (set->data != NULL)                                              \
+    if (set->data)                                                      \
       HASHSET_FREE(set->data);                                          \
-    if (set->state != NULL)                                             \
+    if (set->state)                                                     \
       HASHSET_FREE(set->state);                                         \
     set->data = NULL; set->state = NULL;                                \
     set->size = set->capacity = 0;                                      \
@@ -224,7 +230,7 @@ typedef HASHSET_HASH_T hashset_hash_t;
                                               type key,                 \
                                               unsigned int key_len)     \
   {                                                                     \
-    if (set == NULL) return -1;                                         \
+    if (!set) return HASHSET_ERROR_SET_NULL;                            \
                                                                         \
     size_t mask = set->capacity - 1;                                    \
     hashset_hash_t idx = hash_fn(key, key_len) & mask;                  \
@@ -242,7 +248,7 @@ typedef HASHSET_HASH_T hashset_hash_t;
   static inline int prefix##_set_resize(prefix##_set *set,              \
                                         size_t newcap)                  \
   {                                                                     \
-    if (set == NULL) return -1;                                         \
+    if (!set) return HASHSET_ERROR_SET_NULL;                            \
                                                                         \
     prefix##_##type##_size_pair *old_data = set->data;                  \
     uint8_t *old_state = set->state;                                    \
@@ -251,7 +257,9 @@ typedef HASHSET_HASH_T hashset_hash_t;
     set->capacity = newcap;                                             \
     set->data = HASHSET_CALLOC(newcap,                                  \
                                sizeof(prefix##_##type##_size_pair));    \
+    if (!set->data) return HASHSET_ERROR_ALLOCATION;                    \
     set->state = HASHSET_CALLOC(newcap, sizeof(uint8_t));               \
+    if (!set->state) return HASHSET_ERROR_ALLOCATION;                   \
     set->size = 0;                                                      \
                                                                         \
     for (size_t i = 0; i < old_cap; i++)                                \
@@ -269,7 +277,7 @@ typedef HASHSET_HASH_T hashset_hash_t;
                                                                         \
     HASHSET_FREE(old_data);                                             \
     HASHSET_FREE(old_state);                                            \
-    return 0;                                                           \
+    return HASHSET_OK;                                                  \
   }                                                                     \
                                                                         \
   static inline bool prefix##_set_insert(prefix##_set *set,             \
@@ -296,7 +304,7 @@ typedef HASHSET_HASH_T hashset_hash_t;
                                            type key,                    \
                                            unsigned int key_len)        \
   {                                                                     \
-    if (set == NULL) return false;                                      \
+    if (!set) return false;                                             \
     size_t idx = prefix##_set_find_slot(set, key, key_len);             \
     if (idx < 0) return false;                                          \
     return set->state[idx] == 1;                                        \
@@ -306,7 +314,7 @@ typedef HASHSET_HASH_T hashset_hash_t;
                                          type key,                      \
                                          unsigned int key_len)          \
   {                                                                     \
-    if (set == NULL) return false;                                      \
+    if (!set) return false;                                             \
     size_t idx = prefix##_set_find_slot(set, key, key_len);             \
     if (set->state[idx] != 1) return false;                             \
     set->state[idx] = 2; /* mark deleted */                             \
